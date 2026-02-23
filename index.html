@@ -5,49 +5,127 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Acceso</title>
   <style>
-    body { font-family: system-ui, sans-serif; display:flex; min-height:100vh; align-items:center; justify-content:center; background:#0b0f1a; color:#e8ecff; }
-    .card { width:min(420px, 92vw); background:#121a2b; padding:24px; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.35); }
-    h1 { font-size:20px; margin:0 0 12px; }
-    p { opacity:.85; margin:0 0 16px; }
-    input { width:100%; padding:12px 14px; border-radius:12px; border:1px solid #2a3553; background:#0c1326; color:#e8ecff; font-size:16px; }
-    button { width:100%; margin-top:12px; padding:12px 14px; border-radius:12px; border:0; background:#4b7dff; color:white; font-size:16px; cursor:pointer; }
-    button:hover { filter:brightness(1.05); }
-    .msg { margin-top:12px; min-height:22px; color:#ffb3b3; }
-    .hint { margin-top:12px; font-size:12px; opacity:.6; }
+    body{
+      font-family:system-ui,sans-serif; display:flex; min-height:100vh;
+      align-items:center; justify-content:center; background:#0b0f1a; color:#e8ecff; padding:24px;
+    }
+    .wrap{ width:min(920px,96vw); }
+    .card{
+      width:min(420px,92vw); background:#121a2b; padding:24px; border-radius:16px;
+      box-shadow:0 10px 30px rgba(0,0,0,.35); margin:0 auto;
+    }
+    h1{ font-size:20px; margin:0 0 12px; }
+    p{ opacity:.85; margin:0 0 16px; }
+    input{
+      width:100%; padding:12px 14px; border-radius:12px; border:1px solid #2a3553;
+      background:#0c1326; color:#e8ecff; font-size:16px; outline:none;
+    }
+    button{
+      width:100%; margin-top:12px; padding:12px 14px; border-radius:12px; border:0;
+      background:#4b7dff; color:#fff; font-size:16px; cursor:pointer;
+    }
+    button:hover{ filter:brightness(1.05); }
+    .msg{ margin-top:12px; min-height:22px; color:#ffb3b3; }
+    .hint{ margin-top:12px; font-size:12px; opacity:.6; }
+
+    #videoWrap{ display:none; margin:0 auto; }
+    .videoTitle{ text-align:center; margin:0 0 14px; opacity:.9; }
+    .videoBox{
+      border-radius:16px; overflow:hidden;
+      box-shadow:0 10px 30px rgba(0,0,0,.35); background:#000;
+    }
+    video{ width:100%; height:auto; display:block; }
+
+    .backBtn{
+      display:none; margin:16px auto 0;
+      background:transparent; border:1px solid #2a3553; color:#e8ecff;
+      width:min(220px,92vw); padding:12px 14px; border-radius:12px; cursor:pointer;
+    }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Acceso privado</h1>
-    <p>Ingresa el código para continuar.</p>
+  <div class="wrap">
 
-    <input id="code" type="password" inputmode="text" placeholder="Código" autocomplete="off" />
-    <button id="btn">Entrar</button>
+    <!-- ACCESO -->
+    <div class="card" id="card">
+      <h1>Código de Agente🕵🏻‍♂️</h1>
+      <p>Ingresa el código para continuar.</p>
 
-    <div class="msg" id="msg"></div>
-    <div class="hint">Si fallas, no verás el enlace.</div>
+      <input id="code" type="password" inputmode="text" placeholder="Código" autocomplete="off" />
+      <button id="btn">Entrar</button>
+
+      <div class="msg" id="msg"></div>
+      <div class="hint">Si fallas, no verás el video.</div>
+    </div>
+
+    <!-- VIDEO (OCULTO HASTA ACERTAR) -->
+    <div id="videoWrap">
+      <h2 class="videoTitle">Acceso concedido ✅</h2>
+      <div class="videoBox">
+        <!-- IMPORTANTÍSIMO:
+             Sube tu video al repo y llámalo EXACTO: video.mp4
+             (misma carpeta que index.html) -->
+        <video id="vid" controls preload="metadata" playsinline>
+          <source src="video.mp4" type="video/mp4" />
+          Tu navegador no soporta video.
+        </video>
+      </div>
+    </div>
+
+    <!-- Botón para volver (opcional) -->
+    <button class="backBtn" id="backBtn">Volver</button>
   </div>
 
   <script>
-    // ✅ CAMBIA ESTO:
-    const CODIGO_CORRECTO = "naruto123"; // <-- tu código
-    const ENLACE_SECRETO = "https://example.com/tu-enlace-secreto"; // <-- tu enlace real
+    // ✅ CÓDIGOS VÁLIDOS (edita esta lista)
+    const CODIGOS_VALIDOS = ["2201", "2095", "1883", "0001"];
 
-    // (Opcional) Límite de intentos
-    const MAX_INTENTOS = 5;
+    // (Opcional) límite de intentos (pon 999 mientras pruebas)
+    const MAX_INTENTOS = 999;
     let intentos = 0;
 
     const input = document.getElementById("code");
     const msg = document.getElementById("msg");
     const btn = document.getElementById("btn");
+    const card = document.getElementById("card");
+
+    const videoWrap = document.getElementById("videoWrap");
+    const vid = document.getElementById("vid");
+    const backBtn = document.getElementById("backBtn");
+
+    function mostrarVideo() {
+      msg.textContent = "";
+      card.style.display = "none";
+      videoWrap.style.display = "block";
+      backBtn.style.display = "block";
+
+      // Intenta reproducir (normalmente funciona porque hubo interacción)
+      vid.currentTime = 0;
+      vid.play().catch(() => {});
+    }
+
+    function resetear() {
+      vid.pause();
+      vid.currentTime = 0;
+
+      videoWrap.style.display = "none";
+      backBtn.style.display = "none";
+      card.style.display = "block";
+
+      input.value = "";
+      msg.textContent = "";
+      intentos = 0;
+      btn.disabled = false;
+      input.disabled = false;
+      input.focus();
+    }
 
     function intentar() {
       const codigo = input.value.trim();
       intentos++;
 
-      if (codigo === CODIGO_CORRECTO) {
-        // Redirige al enlace secreto
-        window.location.href = ENLACE_SECRETO;
+      if (CODIGOS_VALIDOS.includes(codigo)) {
+        mostrarVideo();
         return;
       }
 
@@ -67,6 +145,8 @@
     input.addEventListener("keydown", (e) => {
       if (e.key === "Enter") intentar();
     });
+
+    backBtn.addEventListener("click", resetear);
   </script>
 </body>
 </html>
